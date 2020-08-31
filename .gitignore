@@ -1,2 +1,12 @@
+# because I dev on a mac
 *.DS_Store
+
+# binaries we don't want to upload
+*.bin
+*.elf
+
+# folders for intermediates
+packages/
+staging/
+
 
