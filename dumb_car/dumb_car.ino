@@ -8,15 +8,19 @@ const char* ssid = "<ssid>";
 const char* password = "<password>";
 */
 
-#define LED 2 //Define blinking LED pin
-
 #define HTTP_REST_PORT 8080
 ESP8266WebServer server(HTTP_REST_PORT);
 
+struct Vehicle {
+    bool lightStatus = false;
+    float steeringStatus = 0.0f;
+    float speedStatus = 0.0f;
+};
+
+Vehicle car();
+
 void setup()
 {
-    pinMode(LED, OUTPUT); // Initialize the LED pin as an output
-
     Serial.begin(115200);
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
@@ -28,6 +32,7 @@ void setup()
         delay(500);
         Serial.print(".");
     }
+
     Serial.println("");
     Serial.print("Connected to ");
     Serial.println(ssid);
@@ -41,11 +46,9 @@ void setup()
         Serial.println("MDNS responder started");
     }
 
-    // Set server routing
     restServerRouting();
-    // Set not found response
     server.onNotFound(handleNotFound);
-    // Start server
+
     server.begin();
     Serial.println("HTTP server started");
 }
@@ -56,31 +59,78 @@ void loop()
     server.handleClient();
 }
 
-void getHelloWord()
-{
-    server.send(200, "text/json", "{\"name\": \"Hello world\"}");
+const char* lightStatusString() {
+    char* json;
+    sprintf(json, "\"lights\":%d", car->lightStatus);
+    return json;
 }
 
-void blinkOn()
-{
-    digitalWrite(LED, LOW);  // Turn the LED on (Note that LOW is the voltage level)
-    server.send(200, F("text/html"), F(""));
+const char* steeringStatusString() {
+    char* json;
+    sprintf(json, "\"steering\":%d", car->steeringStatus);
+    return json;
 }
 
-void blinkOff()
+const char* speedStatusString() {
+    char* json;
+    sprintf(json, "\"speed\":%d", car->speedStatus);
+    return json;
+}
+
+void getStatus() {
+
+}
+
+void getLights() {
+    char* status;
+    sprintf(status, "{%s}", lightStatusString());
+    server.send(200, "text/json", status);
+}
+
+void setLights()
 {
-    digitalWrite(LED, HIGH); // Turn the LED off by making the voltage HIGH
-    server.send(200, F("text/html"), F(""));
+    /*DynamicJsonDocument doc(512);
+DeserializationError error = deserializeJson(doc, postBody);
+JsonObject postObj = doc.as<JsonObject>();*/
+
+    server.send(200, "text/json", "");
+}
+
+void getSpeed() {
+    char* status;
+    sprintf(status, "{%s}", speedStatusString());
+    server.send(200, "text/json", status);
+}
+
+void setSpeed()
+{
+
+    server.send(200, "text/json", "");
+}
+
+void getSteering() {
+    char* status;
+    sprintf(status, "{%s}", steeringStatusString());
+    server.send(200, "text/json", status);
+}
+
+void setSteering()
+{
+
+    server.send(200, "text/json", "");
 }
 
 void restServerRouting()
 {
+    // index just describes the calls you can make for convenience
     server.on("/", HTTP_GET, []() {
-        server.send(200, F("text/html"), F("Welcome to the REST Web Server"));
+        server.send(200, F("text/html"), F("<html><body>Usage:</body></html>"));
     });
-    server.on("/on", HTTP_POST, blinkOn);
-    server.on("/off", HTTP_POST, blinkOff);
-    server.on(F("/helloWorld"), HTTP_GET, getHelloWord);
+
+
+    server.on("/steer", HTTP_POST, setSteering);
+    server.on("/lights", HTTP_POST, setLights);
+    server.on("/speed", HTTP_POST, setSpeed);
 }
 
 void handleNotFound()

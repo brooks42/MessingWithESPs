@@ -8,6 +8,9 @@ const char* ssid = "<ssid>";
 const char* password = "<password>";
 */
 
+// this file was adapted from https://www.mischianti.org/2020/05/16/how-to-create-a-rest-server-on-esp8266-and-esp32-startup-part-1/
+// so shoutouts to Renzo Mischianti
+
 #define LED 2 //Define blinking LED pin
 
 #define HTTP_REST_PORT 8080
