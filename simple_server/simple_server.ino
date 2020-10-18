@@ -2,13 +2,19 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include "router_deets.h"
+// if you clone this repo naked you'll need to make this `router_deets.h` file too it's just
+/*
+const char* ssid = "<ssid>";
+const char* password = "<password>";
+*/
 
 #define LED 2 //Define blinking LED pin
 
 #define HTTP_REST_PORT 8080
 ESP8266WebServer server(HTTP_REST_PORT);
 
-void setup() {
+void setup()
+{
     pinMode(LED, OUTPUT); // Initialize the LED pin as an output
 
     Serial.begin(115200);
@@ -45,27 +51,40 @@ void setup() {
 }
 
 // the loop function runs over and over again forever
-void loop() {
+void loop()
+{
     server.handleClient();
-    // digitalWrite(LED, LOW);  // Turn the LED on (Note that LOW is the voltage level)
-    // delay(1000);             // Wait for a second
-    // digitalWrite(LED, HIGH); // Turn the LED off by making the voltage HIGH
-    // delay(1000);             // Wait for two seconds
 }
 
-void getHelloWord() {
+void getHelloWord()
+{
     server.send(200, "text/json", "{\"name\": \"Hello world\"}");
 }
 
-void restServerRouting() {
+void blinkOn()
+{
+    digitalWrite(LED, LOW);  // Turn the LED on (Note that LOW is the voltage level)
+    server.send(200, F("text/html"), F(""));
+}
+
+void blinkOff()
+{
+    digitalWrite(LED, HIGH); // Turn the LED off by making the voltage HIGH
+    server.send(200, F("text/html"), F(""));
+}
+
+void restServerRouting()
+{
     server.on("/", HTTP_GET, []() {
-        server.send(200, F("text/html"),
-                            F("Welcome to the REST Web Server"));
+        server.send(200, F("text/html"), F("Welcome to the REST Web Server"));
     });
+    server.on("/on", HTTP_POST, blinkOn);
+    server.on("/off", HTTP_POST, blinkOff);
     server.on(F("/helloWorld"), HTTP_GET, getHelloWord);
 }
 
-void handleNotFound() {
+void handleNotFound()
+{
     String message = "File Not Found\n\n";
     message += "URI: ";
     message += server.uri();
