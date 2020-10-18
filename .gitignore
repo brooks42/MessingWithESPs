@@ -5,9 +5,10 @@
 *.bin
 *.elf
 
-# folders for intermediates
+# folders for intermediates and libraries
 packages/
 staging/
+libraries/
 
 # hide my wifi deets
 simple_server/router_deets.h

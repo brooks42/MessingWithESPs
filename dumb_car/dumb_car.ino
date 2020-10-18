@@ -2,6 +2,11 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include "router_deets.h"
+
+// from https://github.com/bblanchon/ArduinoJson, you can install this
+// w/ the ArduinoCli by doing `arduino-cli lib install ArduinoJson`
+#include <ArduinoJson.h>
+
 // if you clone this repo naked you'll need to make this `router_deets.h` file too it's just
 /*
 const char* ssid = "<ssid>";
@@ -17,7 +22,7 @@ struct Vehicle {
     float speedStatus = 0.0f;
 };
 
-Vehicle car();
+Vehicle car;
 
 void setup()
 {
@@ -59,32 +64,28 @@ void loop()
     server.handleClient();
 }
 
-const char* lightStatusString() {
-    char* json;
-    sprintf(json, "\"lights\":%d", car->lightStatus);
-    return json;
-}
-
-const char* steeringStatusString() {
-    char* json;
-    sprintf(json, "\"steering\":%d", car->steeringStatus);
-    return json;
-}
-
-const char* speedStatusString() {
-    char* json;
-    sprintf(json, "\"speed\":%d", car->speedStatus);
-    return json;
-}
-
 void getStatus() {
 
+    DynamicJsonDocument doc(128);
+    doc["lights"] = car.lightStatus;
+    doc["speed"] = car.speedStatus;
+    doc["steering"] = car.steeringStatus;
+
+    Serial.print(F("Stream..."));
+    String buf;
+    serializeJson(doc, buf);
+    server.send(200, "text/json", buf);
 }
 
 void getLights() {
-    char* status;
-    sprintf(status, "{%s}", lightStatusString());
-    server.send(200, "text/json", status);
+
+    DynamicJsonDocument doc(24);
+    doc["lights"] = car.lightStatus;
+
+    Serial.print(F("Stream..."));
+    String buf;
+    serializeJson(doc, buf);
+    server.send(200, "text/json", buf);
 }
 
 void setLights()
@@ -97,9 +98,14 @@ JsonObject postObj = doc.as<JsonObject>();*/
 }
 
 void getSpeed() {
-    char* status;
-    sprintf(status, "{%s}", speedStatusString());
-    server.send(200, "text/json", status);
+    
+    DynamicJsonDocument doc(24);
+    doc["speed"] = car.speedStatus;
+
+    Serial.print(F("Stream..."));
+    String buf;
+    serializeJson(doc, buf);
+    server.send(200, "text/json", buf);
 }
 
 void setSpeed()
@@ -109,9 +115,14 @@ void setSpeed()
 }
 
 void getSteering() {
-    char* status;
-    sprintf(status, "{%s}", steeringStatusString());
-    server.send(200, "text/json", status);
+
+    DynamicJsonDocument doc(24);
+    doc["steering"] = car.steeringStatus;
+
+    Serial.print(F("Stream..."));
+    String buf;
+    serializeJson(doc, buf);
+    server.send(200, "text/json", buf);
 }
 
 void setSteering()
@@ -127,10 +138,14 @@ void restServerRouting()
         server.send(200, F("text/html"), F("<html><body>Usage:</body></html>"));
     });
 
-
     server.on("/steer", HTTP_POST, setSteering);
     server.on("/lights", HTTP_POST, setLights);
     server.on("/speed", HTTP_POST, setSpeed);
+
+    server.on("/steer", HTTP_GET, getSteering);
+    server.on("/lights", HTTP_GET, getLights);
+    server.on("/speed", HTTP_GET, getSpeed);
+    server.on("/status", HTTP_GET, getStatus);
 }
 
 void handleNotFound()
