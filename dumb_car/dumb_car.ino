@@ -90,11 +90,18 @@ void getLights() {
 
 void setLights()
 {
-    /*DynamicJsonDocument doc(512);
-DeserializationError error = deserializeJson(doc, postBody);
-JsonObject postObj = doc.as<JsonObject>();*/
+    String postBody = server.arg("plain");
 
-    server.send(200, "text/json", "");
+    DynamicJsonDocument doc(512);
+    DeserializationError error = deserializeJson(doc, postBody);
+    JsonObject postObj = doc.as<JsonObject>();
+
+    if (postObj.containsKey("lights")) {
+        car.lightStatus = postObj["lights"];
+        server.send(200, "text/plain", "");
+    } else {
+        server.send(400, "text/plain", "must define a `lights` boolean to set lights");
+    }
 }
 
 void getSpeed() {
@@ -110,8 +117,18 @@ void getSpeed() {
 
 void setSpeed()
 {
+    String postBody = server.arg("plain");
 
-    server.send(200, "text/json", "");
+    DynamicJsonDocument doc(512);
+    DeserializationError error = deserializeJson(doc, postBody);
+    JsonObject postObj = doc.as<JsonObject>();
+
+    if (postObj.containsKey("speed")) {
+        car.speedStatus = postObj["speed"];
+        server.send(200, "text/plain", "");
+    } else {
+        server.send(400, "text/plain", "must define a `speed` float between -1 and 1");
+    }
 }
 
 void getSteering() {
@@ -127,8 +144,18 @@ void getSteering() {
 
 void setSteering()
 {
+    String postBody = server.arg("plain");
 
-    server.send(200, "text/json", "");
+    DynamicJsonDocument doc(512);
+    DeserializationError error = deserializeJson(doc, postBody);
+    JsonObject postObj = doc.as<JsonObject>();
+
+    if (postObj.containsKey("steer")) {
+        car.steeringStatus = postObj["steer"];
+        server.send(200, "text/plain", "");
+    } else {
+        server.send(400, "text/plain", "must define a `steer` float between -1 and 1");
+    }
 }
 
 void restServerRouting()
