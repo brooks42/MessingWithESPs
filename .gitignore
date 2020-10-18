@@ -9,4 +9,6 @@
 packages/
 staging/
 
+# hide my wifi deets
+simple_server/router_deets.h
 

@@ -19,6 +19,16 @@ arduino-cli core install esp8266:esp8266
 arduino-cli compile -b esp8266:esp8266:espectro blink/ 
 ```
 
+You can get the port for your ESP device with 
+
+```
+ls /dev/tty.*
+```
+
+You could grep that to grab the USB serial but I'm too lazy right now
+
+Then updload the artifact with
+
 ```
 arduino-cli upload --port /dev/cu.usbserial-1420 -b esp8266:esp8266:espectro blink/
 ```
