@@ -1,7 +1,19 @@
 ### Setups
 
-Set up your `arduino-cli` config like:
+You'll need to install `arduino-cli` https://arduino.github.io/arduino-cli/1.0/installation/
 
+```
+brew update
+brew install arduino-cli
+```
+
+Then to make the arduino-cli config file do
+
+`arduino-cli config init`
+
+Set up your `arduino-cli` config like this (pay attention to spacing, it needs to be like the raw README file not what github shows so it's well-formed yaml):
+
+```
 proxy_type: auto
 sketchbook_path: .
 arduino_data: .
@@ -9,6 +21,7 @@ board_manager:
     additional_urls:
         - https://arduino.esp8266.com/stable/package_esp8266com_index.json
         - https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+```
 
 You have to set it up to use the ESP8266 
 
