@@ -3,6 +3,7 @@
 #include <ESP8266mDNS.h>
 #include <ESP8266httpUpdate.h>
 #include <ArduinoOTA.h>
+#include <sstream>
 
 #include <NTPClient.h>
 #include <WiFiUdp.h>
@@ -28,7 +29,39 @@ ESP8266WebServer server(HTTP_REST_PORT);
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, NTP_ADDRESS, NTP_OFFSET, NTP_INTERVAL);
 
+// soil data management
+struct SoilData {
+    unsigned long timestamp;
+    short humidity;
+};
+
+#define SOIL_DATAPOINTS_COUNT 100
+int soilDataIndex = 0;
+SoilData *soilData[SOIL_DATAPOINTS_COUNT];
+
 void(* resetFunc) (void) = 0;
+
+/*
+Writes soil humidity data to RAM
+*/
+void writeSoilDataToIndex() {
+
+    SoilData *point = new SoilData();
+    point->humidity = getHumidityData();
+    point->timestamp = timeClient.getEpochTime();
+    soilData[soilDataIndex] = point;
+
+    soilDataIndex++;
+
+    // reset the soil data count to loop, if we overflow
+    if (soilDataIndex >= SOIL_DATAPOINTS_COUNT) {
+        soilDataIndex = 0;
+    }
+}
+
+short getHumidityData() {
+    return timeClient.getSeconds();
+}
 
 void setup()
 {
@@ -69,6 +102,12 @@ void setup()
     toggleOn();
 
     timeClient.begin();
+
+    for (int i = 0; i < SOIL_DATAPOINTS_COUNT; i++) {
+        soilData[i] = new SoilData();
+        soilData[i]->timestamp = timeClient.getEpochTime();
+        soilData[i]->humidity = 100;
+    }
 }
 
 // the loop function runs over and over again forever
@@ -87,6 +126,7 @@ void restServerRouting()
     server.on(F("/off"), HTTP_POST, blinkOff);
     server.on(F("/helloWorld"), HTTP_GET, getHelloWord);
     server.on(F("/time"), HTTP_GET, getTime);
+    server.on(F("/soildata"), HTTP_GET, getSoilData);
 
     // server.on(F("/update"), HTTP_PUT, performOtaUpdate);
 }
@@ -133,6 +173,9 @@ void toggleOff()
     digitalWrite(LED, HIGH); // Turn the LED off by making the voltage HIGH
 }
 
+/**
+
+*/
 void getTime() {
 
   // String formattedTime = 
@@ -140,6 +183,23 @@ void getTime() {
     server.send(200, F("text/html"), timeClient.getFormattedTime());
 }
 
+/**
+
+*/
+void getSoilData() {
+    
+    std::ostringstream oss;
+
+    for (int i = 0; i < SOIL_DATAPOINTS_COUNT; i++) {
+        oss << soilData[i]->timestamp << "," << soilData[i]->humidity;
+
+        if (i < SOIL_DATAPOINTS_COUNT - 1) {
+            oss << ","; 
+        }
+    }
+
+    server.send(200, "text/csv", oss.str().c_str());
+}
 
 void handleNotFound()
 {
