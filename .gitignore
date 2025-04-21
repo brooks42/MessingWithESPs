@@ -11,6 +11,4 @@ staging/
 libraries/
 
 # hide my wifi deets
-simple_server/router_deets.h
-dumb_car/router_deets.h
-
+*/router_deets.h

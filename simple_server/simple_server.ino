@@ -120,18 +120,17 @@ void handleNotFound()
     server.send(404, "text/plain", message);
 }
 
-void performOtaUpdate() 
+void performOtaUpdate()
 {
-
-    char *address = "10.0.0.220";
+    const char *address = "10.0.0.220";
     int port = 8081;
-    char *resource = "/binary.bin";
+    const char *resource = "/binary.bin";
 
     toggleOff();
 
     ESPhttpUpdate.closeConnectionsOnUpdate(false);
     ESPhttpUpdate.rebootOnUpdate(false);
-    t_httpUpdate_return ret = ESPhttpUpdate.update("10.0.0.220", port, "/binary.bin");
+    t_httpUpdate_return ret = ESPhttpUpdate.update(address, port, resource);
     ESPhttpUpdate.onStart(updateStart);
     ESPhttpUpdate.onEnd(updateEnd);
     ESPhttpUpdate.onError(updateError);
